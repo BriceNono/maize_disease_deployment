@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Diagnosis Result{% endblock %}
+
+{% block content %}
+<section class="result-section">
+  <div class="container">
+
+    <a href="{{ url_for('index') }}" class="back-link">← Analyse another leaf</a>
+
+    <!-- ── VERDICT CARD ─────────────────────────────────── -->
+    <div class="verdict-card" style="--disease-color: {{ response.color }}">
+      <div class="verdict-left">
+        <div class="verdict-badge" style="background: {{ response.color }}20; border-color: {{ response.color }}40">
+          <span class="verdict-icon">{{ response.icon }}</span>
+        </div>
+        <div class="verdict-info">
+          {% if response.class_key == 'Healthy' %}
+          <div class="verdict-status healthy">✔ No Disease Detected</div>
+          {% else %}
+          <div class="verdict-status diseased">⚠ Disease Detected</div>
+          {% endif %}
+          <h2 class="verdict-name">{{ response.prediction }}</h2>
+          <p class="verdict-scientific">{{ response.scientific }}</p>
+        </div>
+      </div>
+      <div class="verdict-right">
+        <div class="confidence-dial">
+          <svg viewBox="0 0 120 120" class="dial-svg">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#1a2510" stroke-width="12"/>
+            <circle cx="60" cy="60" r="50" fill="none"
+              stroke="{{ response.color }}" stroke-width="12"
+              stroke-dasharray="{{ (response.confidence * 314)|round }} 314"
+              stroke-dashoffset="78.5"
+              stroke-linecap="round"
+              class="dial-progress"/>
+          </svg>
+          <div class="dial-label">
+            <span class="dial-pct">{{ response.confidence_pct }}</span>
+            <span class="dial-sub">Confidence</span>
+          </div>
+        </div>
+        <div class="verdict-meta">
+          <div class="meta-row">
+            <span class="meta-key">Severity</span>
+            <span class="meta-val sev-{{ response.class_key|lower }}">{{ response.severity }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-key">Spread risk</span>
+            <span class="meta-val">{{ response.spread }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GRID: Image + Probabilities ──────────────────── -->
+    <div class="result-grid">
+
+      <!-- Uploaded leaf -->
+      <div class="result-panel">
+        <h3 class="panel-title">Analysed Leaf</h3>
+        <div class="leaf-img-wrap">
+          <img src="{{ image_url }}" alt="Uploaded maize leaf" class="leaf-img" />
+        </div>
+      </div>
+
+      <!-- Probability bars -->
+      <div class="result-panel">
+        <h3 class="panel-title">Class Probabilities</h3>
+        <div class="prob-bars">
+          {% for item in response.all_probs|sort(attribute='prob', reverse=True) %}
+          <div class="prob-row {% if item.key == response.class_key %}prob-row-active{% endif %}">
+            <div class="prob-label-row">
+              <span class="prob-label">{{ item.label }}</span>
+              <span class="prob-pct" style="color:{{ item.color }}">{{ item.pct }}</span>
+            </div>
+            <div class="prob-track">
+              <div class="prob-fill"
+                   style="width:{{ (item.prob * 100)|round }}%; background:{{ item.color }}"
+                   data-width="{{ (item.prob * 100)|round }}"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DESCRIPTION ──────────────────────────────────── -->
+    <div class="info-card">
+      <h3 class="info-title">What This Means</h3>
+      <p class="info-body">{{ response.description }}</p>
+    </div>
+
+    <!-- ── ACTIONS + PREVENTION GRID ────────────────────── -->
+    <div class="action-grid">
+
+      <div class="action-card">
+        <h3 class="action-title" style="color: {{ response.color }}">
+          {% if response.class_key == 'Healthy' %}
+          ✓ Monitoring Checklist
+          {% else %}
+          ⚡ Immediate Actions Required
+          {% endif %}
+        </h3>
+        <ol class="action-list">
+          {% for action in response.actions %}
+          <li class="action-item">{{ action }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+
+      <div class="action-card prevention-card">
+        <h3 class="action-title">🛡 Prevention & Long-Term Management</h3>
+        <p class="prevention-text">{{ response.prevention }}</p>
+      </div>
+
+    </div>
+
+    <!-- ── CTA ──────────────────────────────────────────── -->
+    <div class="cta-row">
+      <a href="{{ url_for('index') }}" class="btn btn-primary">Analyse Another Leaf</a>
+      <a href="{{ url_for('diseases') }}" class="btn btn-outline">Learn About Diseases</a>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animate probability bars on load
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.prob-fill').forEach(bar => {
+    const target = bar.dataset.width + '%';
+    bar.style.width = '0%';
+    setTimeout(() => { bar.style.width = target; }, 200);
+  });
+});
+</script>
+{% endblock %}

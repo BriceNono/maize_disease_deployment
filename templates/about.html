@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1 class="page-title">About MaizeScan</h1>
+    <p class="page-sub">
+      A CNN-based maize leaf disease detection system — Graduation Project, ULK Data Science 2025/2026.
+    </p>
+  </div>
+</section>
+
+<section class="about-section">
+  <div class="container">
+
+    <div class="about-grid">
+      <div class="about-card">
+        <h3>Background</h3>
+        <p>Agriculture plays a crucial role in ensuring food security and economic development in Rwanda and across East Africa. Maize is the most widely produced staple crop, yet yield losses from leaf diseases — Northern Leaf Blight, Common Rust, and Gray Leaf Spot — can reach 30–80% in severe outbreak years.</p>
+        <p>MaizeScan was developed to provide farmers and extension officers with an accessible, AI-powered tool for rapid disease identification using a smartphone or tablet.</p>
+      </div>
+      <div class="about-card">
+        <h3>Model Architecture</h3>
+        <ul>
+          <li><strong>Base:</strong> VGG16 pre-trained on ImageNet (13 conv layers + 3 FC layers)</li>
+          <li><strong>Head:</strong> GlobalAvgPool → Dense(512, ReLU) → BN → Dropout(0.5) → Dense(256, ReLU) → BN → Dropout(0.3) → Softmax(4)</li>
+          <li><strong>Phase 1:</strong> 30 epochs, frozen VGG16, LR = 1×10⁻⁴</li>
+          <li><strong>Phase 2:</strong> 25 epochs, block5 unfrozen, LR = 1×10⁻⁵</li>
+          <li><strong>Optimizer:</strong> Adam | <strong>Loss:</strong> Categorical Cross-Entropy</li>
+        </ul>
+      </div>
+      <div class="about-card">
+        <h3>Dataset</h3>
+        <div class="dataset-table">
+          <div class="dt-row dt-head">
+            <span>Class</span><span>Disease Agent</span><span>Images</span>
+          </div>
+          <div class="dt-row"><span>Northern Leaf Blight</span><span>Exserohilum turcicum</span><span>1,150</span></div>
+          <div class="dt-row"><span>Common Rust</span><span>Puccinia sorghi</span><span>1,306</span></div>
+          <div class="dt-row"><span>Gray Leaf Spot</span><span>Cercospora zeae-maydis</span><span>574</span></div>
+          <div class="dt-row"><span>Healthy</span><span>None</span><span>822</span></div>
+          <div class="dt-row dt-total"><span>Total</span><span>PlantVillage + Field</span><span>3,852</span></div>
+        </div>
+      </div>
+      <div class="about-card">
+        <h3>System Design (OOSADM)</h3>
+        <p>The system was designed using <strong>Object-Oriented System Analysis and Design Methodology (OOSADM)</strong>, producing four UML artefacts:</p>
+        <ul>
+          <li><strong>Use Case Diagram</strong> — Farmer and Administrator actors</li>
+          <li><strong>Class Diagram</strong> — LeafImage, CNNModel, DiseaseClass, DiagnosisResult, FlaskApp</li>
+          <li><strong>Sequence Diagram</strong> — 11-step leaf upload and diagnosis flow</li>
+          <li><strong>Activity Diagram</strong> — Complete workflow with decision branches</li>
+        </ul>
+        <p>Development followed an <strong>Agile Scrum-inspired</strong> approach across 4 sprints.</p>
+      </div>
+      <div class="about-card">
+        <h3>Technology Stack</h3>
+        <ul>
+          <li>Python 3.10+</li>
+          <li>TensorFlow / Keras (VGG16)</li>
+          <li>Flask (web framework)</li>
+          <li>Pillow (image preprocessing)</li>
+          <li>NumPy, scikit-learn</li>
+          <li>Google Colab (training environment)</li>
+          <li>Render (cloud deployment)</li>
+        </ul>
+      </div>
+      <div class="about-card about-card-author">
+        <h3>Research Team</h3>
+        <div class="author-row">
+          <div class="author-avatar">BGN</div>
+          <div>
+            <strong>Brice Gaetan Nono Youmbi</strong>
+            <span>Roll No. 202211043</span>
+            <span>BSc Data Science · Year 4 / Day</span>
+          </div>
+        </div>
+        <p style="margin-top:1rem"><strong>Supervisor:</strong> Prof. Jonas Niyitegeka</p>
+        <p><strong>Institution:</strong> Kigali Independent University ULK<br>
+        School of Science and Technology<br>
+        Department of Computer Science &amp; Data Science</p>
+        <p><em>Kigali, March 2026</em></p>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

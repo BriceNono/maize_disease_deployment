@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Detect Disease{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ──────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-grain"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-tag">AI-Powered · VGG16 CNN · 93–99% Accuracy</div>
+    <h1 class="hero-title">
+      Detect Maize<br>Leaf Diseases<br>
+      <span class="hero-accent">Instantly.</span>
+    </h1>
+    <p class="hero-sub">
+      Upload a photo of a maize leaf and receive an AI-powered diagnosis
+      with treatment recommendations in seconds. Supporting farmers across Rwanda and East Africa.
+    </p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-n">3,852</span><span class="stat-l">Training Images</span></div>
+      <div class="stat"><span class="stat-n">4</span><span class="stat-l">Disease Classes</span></div>
+      <div class="stat"><span class="stat-n">99%</span><span class="stat-l">Best Accuracy</span></div>
+      <div class="stat"><span class="stat-n">VGG16</span><span class="stat-l">Architecture</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── UPLOAD CARD ───────────────────────────────────────────── -->
+<section class="upload-section">
+  <div class="container">
+
+    {% if error %}
+    <div class="alert alert-error">
+      <span class="alert-icon">⚠</span>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    {% if demo_mode %}
+    <div class="alert alert-info">
+      <span class="alert-icon">ℹ</span>
+      <span>Running in <strong>Demo Mode</strong> — place your trained model at <code>model/vgg16_maize_best.h5</code> to enable real inference.</span>
+    </div>
+    {% endif %}
+
+    <div class="upload-card" id="uploadCard">
+      <form action="{{ url_for('predict') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+
+        <!-- Drop Zone -->
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-content" id="dropContent">
+            <div class="drop-icon">🌿</div>
+            <p class="drop-title">Drop your leaf image here</p>
+            <p class="drop-sub">or click to browse — JPG / PNG, max 16 MB</p>
+            <button type="button" class="btn btn-primary" id="browseBtn">Choose Image</button>
+          </div>
+          <div class="dropzone-preview hidden" id="previewArea">
+            <img id="previewImg" src="#" alt="Leaf preview" />
+            <div class="preview-info">
+              <span id="previewName" class="preview-name"></span>
+              <button type="button" class="btn-clear" id="clearBtn">✕ Remove</button>
+            </div>
+          </div>
+          <input type="file" name="leaf_image" id="fileInput" accept=".jpg,.jpeg,.png" class="file-input" />
+        </div>
+
+        <!-- Disease classes reminder -->
+        <div class="classes-row">
+          <span class="class-chip" style="--c:#E24B4A">🔴 Northern Leaf Blight</span>
+          <span class="class-chip" style="--c:#EF9F27">🟡 Common Rust</span>
+          <span class="class-chip" style="--c:#888780">⚫ Gray Leaf Spot</span>
+          <span class="class-chip" style="--c:#639922">🟢 Healthy</span>
+        </div>
+
+        <button type="submit" class="btn btn-submit" id="submitBtn" disabled>
+          <span class="btn-label">Run Disease Detection</span>
+          <span class="btn-loading hidden">Analysing… <span class="spinner"></span></span>
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Tips -->
+    <div class="tips-row">
+      <div class="tip">
+        <span class="tip-icon">📷</span>
+        <p>Take a close-up photo of the leaf in good lighting</p>
+      </div>
+      <div class="tip">
+        <span class="tip-icon">🍃</span>
+        <p>Focus on a single leaf with clear, visible symptoms</p>
+      </div>
+      <div class="tip">
+        <span class="tip-icon">☀️</span>
+        <p>Avoid shadows, blur, or cluttered backgrounds</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Drop zone + preview logic
+const dropzone  = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const browseBtn = document.getElementById('browseBtn');
+const clearBtn  = document.getElementById('clearBtn');
+const dropContent= document.getElementById('dropContent');
+const previewArea= document.getElementById('previewArea');
+const previewImg = document.getElementById('previewImg');
+const previewName= document.getElementById('previewName');
+const submitBtn  = document.getElementById('submitBtn');
+const form       = document.getElementById('uploadForm');
+
+browseBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) showPreview(e.target.files[0]);
+});
+
+clearBtn.addEventListener('click', () => {
+  fileInput.value = '';
+  dropContent.classList.remove('hidden');
+  previewArea.classList.add('hidden');
+  submitBtn.disabled = true;
+});
+
+['dragover','dragenter'].forEach(ev => {
+  dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+});
+['dragleave','drop'].forEach(ev => {
+  dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('drag-over'); });
+});
+dropzone.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0];
+  if (f) { fileInput.files = e.dataTransfer.files; showPreview(f); }
+});
+
+function showPreview(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    previewImg.src = ev.target.result;
+    previewName.textContent = file.name;
+    dropContent.classList.add('hidden');
+    previewArea.classList.remove('hidden');
+    submitBtn.disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+form.addEventListener('submit', () => {
+  document.querySelector('.btn-label').classList.add('hidden');
+  document.querySelector('.btn-loading').classList.remove('hidden');
+  submitBtn.disabled = true;
+});
+</script>
+{% endblock %}

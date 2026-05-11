@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}MaizeScan{% endblock %} — Maize Leaf Disease Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────────── -->
+<nav class="nav">
+  <a href="{{ url_for('index') }}" class="nav-brand">
+    <span class="brand-icon">🌽</span>
+    <span class="brand-text">Maize<strong>Scan</strong></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="{{ url_for('index') }}" {% if request.endpoint=='index' %}class="active"{% endif %}>Detect</a></li>
+    <li><a href="{{ url_for('diseases') }}" {% if request.endpoint=='diseases' %}class="active"{% endif %}>Diseases</a></li>
+    <li><a href="{{ url_for('about') }}" {% if request.endpoint=='about' %}class="active"{% endif %}>About</a></li>
+  </ul>
+  {% if demo_mode is defined and demo_mode %}
+  <div class="demo-badge">DEMO MODE</div>
+  {% endif %}
+  <button class="nav-toggle" id="navToggle">☰</button>
+</nav>
+<div class="nav-mobile" id="navMobile">
+  <a href="{{ url_for('index') }}">Detect</a>
+  <a href="{{ url_for('diseases') }}">Diseases</a>
+  <a href="{{ url_for('about') }}">About</a>
+</div>
+
+<!-- ── CONTENT ─────────────────────────────────────────────── -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="brand-icon">🌽</span>
+      <strong>MaizeScan</strong>
+    </div>
+    <p class="footer-desc">
+      CNN-powered maize leaf disease detection using VGG16 transfer learning.<br>
+      Graduation Project — <strong>Brice Gaetan Nono Youmbi</strong> | ULK Data Science 2025/2026<br>
+      Supervisor: Prof. Jonas Niyitegeka
+    </p>
+    <p class="footer-note">
+      Dataset: PlantVillage (3,852 images · 4 classes) · Model: VGG16 + custom head · Accuracy: 93–99%
+    </p>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
