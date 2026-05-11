@@ -14,6 +14,18 @@ from utils.cnn_model import CNNModel
 from utils.diagnosis import DiagnosisResult
 from utils.disease_data import DISEASE_REGISTRY, CLASS_ORDER_KEYS
 
+from model_loader import download_model
+from tensorflow.keras.models import load_model
+
+app = Flask(__name__)
+
+model_path = download_model()
+model = load_model(model_path)
+
+@app.route("/")
+def home():
+    return "Model loaded successfully!"
+
 logging.basicConfig(level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(name)s — %(message)s')
 log = logging.getLogger('FlaskApp')

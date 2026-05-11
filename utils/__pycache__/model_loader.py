@@ -8,6 +8,19 @@ import os
 import logging
 import numpy as np
 
+import gdown
+import os
+
+MODEL_PATH = "model.h5"
+URL = "https://drive.google.com/uc?id=YOUR_FILE_ID"
+
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        print("Downloading model...")
+        gdown.download(URL, MODEL_PATH, quiet=False)
+
+    return MODEL_PATH
+
 log = logging.getLogger('model_loader')
 
 # Model is loaded as a singleton at app startup
